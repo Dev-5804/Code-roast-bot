@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import OutputPanel from '@/components/OutputPanel';
 import { AnalysisResponse } from '@/types/analysis';
+import { registerCompletionProviders } from '@/lib/completions';
 
 // Dynamically import Monaco Editor to avoid SSR issues
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -109,6 +110,7 @@ export default function Home() {
               theme="light"
               value={code}
               onChange={(value) => setCode(value || '')}
+              beforeMount={registerCompletionProviders}
               options={{
                 minimap: { enabled: false },
                 fontSize: 14,
