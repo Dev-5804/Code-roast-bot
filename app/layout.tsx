@@ -24,8 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link href="https://db.onlinewebfonts.com/c/85ae188642d05e631919cb350d543e36?family=Serifa" rel="stylesheet" type="text/css" />
+        <link href="https://db.onlinewebfonts.com/c/8cb72a773a91df29733eddddaae5cf7e?family=OSerif" rel="stylesheet" type="text/css" />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#141423] text-[#f2e9e4]`}
       >
         {children}
       </body>

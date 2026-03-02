@@ -56,6 +56,7 @@ const responseSchema: Schema = {
         },
         refactoredCode: {
             type: Type.STRING,
+            description: "The fully rewritten source code. Plain code only — no markdown code fences, no backticks, no language tags.",
             nullable: true,
         }
     },
@@ -72,7 +73,7 @@ export async function analyzeCode(code: string, language: string, mode: 'strict'
             modePrompt = 'Focus on optimization analysis. Calculate time and space complexity, identify bottlenecks, and suggest concrete optimization improvements. Put the complexity values in the complexity object. Set refactoredCode to null.';
             break;
         case 'refactor':
-            modePrompt = 'Focus on refactoring the code for better structure, naming, and separation of concerns. Provide the full rewritten version of the code in the `refactoredCode` field. Set complexity fields to null.';
+            modePrompt = 'Focus on refactoring the code for better structure, naming, and separation of concerns. Provide the full rewritten version of the code in the `refactoredCode` field as plain source code only — no markdown, no backticks, no code fences. Set complexity fields to null.';
             break;
     }
 

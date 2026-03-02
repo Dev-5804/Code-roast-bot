@@ -43,8 +43,21 @@ export async function POST(req: Request) {
             );
         }
 
-        // 7. Return structured response
-        return NextResponse.json({ success: true, data: schemaValidation.data });
+        // 7. Clean refactoredCode and return
+        const data = schemaValidation.data;
+        if (data.refactoredCode) {
+            // Strip any markdown code fences the model may have included
+            let code = data.refactoredCode;
+            console.log('[Analyze] raw refactoredCode (first 120):', JSON.stringify(code.slice(0, 120)));
+            // Fix double-escaped newlines (Gemini sometimes returns \n instead of real newlines)
+            code = code.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+            // Strip leading ```lang or ``` fence
+            code = code.replace(/^```[\w\s]*\r?\n?/, '');
+            // Strip trailing ``` fence
+            code = code.replace(/\r?\n?```[\s]*$/, '');
+            data.refactoredCode = code.trim();
+        }
+        return NextResponse.json({ success: true, data });
 
     } catch (error: unknown) {
         console.error('API Route Error:', error);
