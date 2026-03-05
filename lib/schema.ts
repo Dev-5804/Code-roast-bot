@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const analyzeRequestSchema = z.object({
-    language: z.string().min(1),
+    language: z.enum(['javascript', 'typescript', 'python', 'java', 'cpp']),
     mode: z.enum(['strict', 'optimize', 'refactor']),
-    code: z.string().min(1).max(20000), // Approximate 500 lines limit, we'll also check line count
+    code: z.string().transform(s => s.trim()).pipe(z.string().min(1).max(20000)),
 });
 
 export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;

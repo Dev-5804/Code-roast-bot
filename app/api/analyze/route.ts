@@ -2,12 +2,22 @@ import { NextResponse } from 'next/server';
 import { validateRequest } from '@/lib/validation';
 import { analyzeCode } from '@/lib/llm';
 import { llmResponseSchema } from '@/lib/schema';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
     try {
+        // 1. Extract client IP and check rate limit
+        const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? req.headers.get('x-real-ip') ?? '127.0.0.1';
+        if (!checkRateLimit(ip).allowed) {
+            return NextResponse.json(
+                { success: false, error: 'Rate limit exceeded. Please try again later.' },
+                { status: 429 }
+            );
+        }
+
         const body = await req.json();
 
-        // 1 & 2. Validate request body and line count
+        // 2 & 3. Validate request body and line count
         const validationResult = validateRequest(body);
         if (!validationResult.success || !validationResult.data) {
             return NextResponse.json(
@@ -57,6 +67,14 @@ export async function POST(req: Request) {
             code = code.replace(/\r?\n?```[\s]*$/, '');
             data.refactoredCode = code.trim();
         }
+
+        // 8. Enforce mode-dependent output rules
+        if (mode !== 'refactor') data.refactoredCode = null;
+        if (mode !== 'optimize') {
+            data.complexity.time = null;
+            data.complexity.space = null;
+        }
+
         return NextResponse.json({ success: true, data });
 
     } catch (error: unknown) {
