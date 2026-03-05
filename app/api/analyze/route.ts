@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { validateRequest } from '@/lib/validation';
 import { analyzeCode } from '@/lib/llm';
 import { llmResponseSchema } from '@/lib/schema';
-import { checkRateLimit } from '@/lib/rateLimit';
+import { checkRateLimit, checkGlobalLimit } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
     try {
@@ -27,6 +27,14 @@ export async function POST(req: Request) {
         }
 
         const { language, mode, code } = validationResult.data;
+
+        // Check global LLM call budget before hitting the API
+        if (!checkGlobalLimit().allowed) {
+            return NextResponse.json(
+                { success: false, error: 'Service is temporarily unavailable. Please try again later.' },
+                { status: 503 }
+            );
+        }
 
         // 3, 4, & 5. Construct prompt, send to LLM, parse JSON
         const startTime = Date.now();
